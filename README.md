@@ -78,3 +78,25 @@ TAB-TDPO introduces a **Conflict-Aware Adaptive Decay** mechanism.
 git clone https://github.com/YourUsername/TAB-TDPO.git
 cd TAB-TDPO
 pip install -r requirements.txt
+
+
+## Training
+```python
+# Example command for training on MSC
+python train_tab_tdpo.py --model_name_or_path Microsoft/Phi-3.5-mini-instruct --output_dir ./checkpoints
+
+
+## 📜 Citation
+If you find this work helpful, please consider citing:
+```latex
+@misc{liao2025tabtdpo,
+      title={TAB-TDPO: Non-Destructive Temporal Alignment for Mutable State Tracking in Long-Context Dialogue}, 
+      author={Yijun Liao},
+      year={2025},
+      note={Under Review / Pre-print available at GitHub},
+}
+
+<div align="center">
+This project is an independent research effort.
+If you are an ArXiv endorser in cs.CL and find this work valuable, please consider endorsing. Thank you! 🙏
+</div>
