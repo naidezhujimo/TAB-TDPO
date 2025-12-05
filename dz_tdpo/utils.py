@@ -8,7 +8,7 @@ def get_semantic_model(device='cpu'):
     if _SEMANTIC_MODEL is None:
         try:
             from sentence_transformers import SentenceTransformer
-            print("🔄 Loading Semantic Embedding Model (all-MiniLM-L6-v2)...")
+            print("Loading Semantic Embedding Model (all-MiniLM-L6-v2)...")
             _SEMANTIC_MODEL = SentenceTransformer('all-MiniLM-L6-v2', device=device)
         except ImportError:
             raise ImportError("Please install sentence-transformers: pip install sentence-transformers")
@@ -69,3 +69,4 @@ def split_subset_metrics(metrics_list, mask):
             avg_metrics[k] = np.mean(values)
     
     return avg_metrics
+
