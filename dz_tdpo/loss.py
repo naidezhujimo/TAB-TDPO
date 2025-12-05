@@ -106,9 +106,9 @@ class TDPO_DKLLoss(nn.Module):
             logits_l, ref_logits_l, batch['labels_l'], batch['masks_l']
         )
         
-        delta_w = log_prob_w - ref_log_prob_w  # [B]
-        delta_l = log_prob_l - ref_log_prob_l  # [B]
-        delta = delta_w - delta_l  # [B]
+        delta_w = log_prob_w - ref_log_prob_w
+        delta_l = log_prob_l - ref_log_prob_l
+        delta = delta_w - delta_l
         delta = torch.clamp(delta, min=-10.0, max=10.0)
 
         safe_time_weights = torch.clamp(time_weights, min=0.01)
@@ -200,3 +200,4 @@ class SimPOLoss(nn.Module):
             }
             
         return loss, metrics
+
