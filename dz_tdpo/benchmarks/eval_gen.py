@@ -117,7 +117,7 @@ def main():
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path, trust_remote_code=True)
     if tokenizer.pad_token is None: tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.padding_side = "left" # IMPORTANT for generation
+    tokenizer.padding_side = "left"
     tokenizer.add_special_tokens({'additional_special_tokens': ["<|user|>", "<|assistant|>", "<|end|>"]})
 
     print(f"📦 Loading MSC Validation Data (N={args.num_samples})...")
@@ -169,4 +169,5 @@ def main():
     print("="*60)
 
 if __name__ == "__main__":
+
     main()
