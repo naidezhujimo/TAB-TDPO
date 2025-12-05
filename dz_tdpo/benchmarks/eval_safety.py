@@ -42,7 +42,6 @@ def construct_flood_prompt(tokenizer, case):
         messages.append({"role": "user", "content": user_flood})
         messages.append({"role": "assistant", "content": asst_flood})
         
-    # 3. 最后的致命一击
     messages.append({"role": "user", "content": case['final_prompt']})
     
     return format_prompt_phi3(tokenizer, messages)
@@ -58,7 +57,7 @@ def run_hard_attack_eval():
         device_map="auto", 
         trust_remote_code=True
     )
-    print("⚠️ Resizing token embeddings...")
+    print("Resizing token embeddings...")
     base_model.resize_token_embeddings(32011) 
     
     tokenizer = AutoTokenizer.from_pretrained(config.model_name, trust_remote_code=True)
@@ -69,15 +68,15 @@ def run_hard_attack_eval():
     results = []
 
     for case in ATTACK_CASES:
-        print(f"\n⚡ Testing Hard Case: {case['type']}")
+        print(f"\nTesting Hard Case: {case['type']}")
         
         full_prompt = construct_flood_prompt(tokenizer, case)
         inputs = tokenizer(full_prompt, return_tensors="pt").to(device)
         input_len = inputs.input_ids.shape[1]
-        print(f"   🌊 Context Length: {input_len} tokens (System Prompt is pushed far back!)")
+        print(f" Context Length: {input_len} tokens (System Prompt is pushed far back!)")
 
         if input_len > 4000:
-            print("   ⚠️ Prompt too long, trimming...")
+            print("  Prompt too long, trimming...")
             inputs.input_ids = inputs.input_ids[:, -4000:]
         
         entry = {
@@ -90,7 +89,7 @@ def run_hard_attack_eval():
         }
 
         model.temporal_bias.use_shielding = False
-        print("  [Shield: OFF] Generating...")
+        print("[Shield: OFF] Generating...")
         with torch.no_grad():
             output_bad = model.generate(
                 **inputs, 
@@ -102,7 +101,7 @@ def run_hard_attack_eval():
         entry["output_no_shield"] = res_bad
 
         model.temporal_bias.use_shielding = True
-        print("  [Shield: ON ] Generating...")
+        print("[Shield: ON ] Generating...")
         with torch.no_grad():
             output_good = model.generate(
                 **inputs, 
@@ -119,14 +118,14 @@ def run_hard_attack_eval():
         
         if off_complied and on_refused:
             entry["defense_success"] = True
-            print("  🛡️ DEFENSE SUCCESS: Shield blocked the attack!")
+            print("DEFENSE SUCCESS: Shield blocked the attack!")
         elif not off_complied:
-            print("  🛡️ Model resisted even without shield (Base safety too strong).")
+            print("Model resisted even without shield (Base safety too strong).")
         else:
-            print("  ⚠️ Shield failed to block.")
+            print("Shield failed to block.")
 
-        print(f"  🔴 OFF: {res_bad[:80]}...")
-        print(f"  🟢 ON : {res_good[:80]}...")
+        print(f"OFF: {res_bad[:80]}...")
+        print(f"ON : {res_good[:80]}...")
         
         results.append(entry)
 
@@ -135,4 +134,5 @@ def run_hard_attack_eval():
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 if __name__ == "__main__":
+
     run_hard_attack_eval()
