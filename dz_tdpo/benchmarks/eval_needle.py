@@ -110,7 +110,7 @@ def generate_dataset():
         for entry in dataset:
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
             
-    print(f"✅ Generated {len(dataset)} samples in {OUTPUT_FILE}")
+    print(f"Generated {len(dataset)} samples in {OUTPUT_FILE}")
     return dataset
 
 class TemporalAttentionBias(nn.Module):
@@ -157,11 +157,11 @@ class TemporalCausalLM_Gen(nn.Module):
                     break
             
             if lambda_key:
-                print(f"🔍 Found lambda in checkpoint: {lambda_key} -> {state_dict[lambda_key].item()}")
+                print(f"Found lambda in checkpoint: {lambda_key} -> {state_dict[lambda_key].item()}")
                 self.temporal_bias.lambda_strength.data = state_dict[lambda_key].data.to(self.device)
             else:
-                print("⚠️ CRITICAL: 'lambda_strength' missing in checkpoint!")
-                print("🔧 MANUAL FIX: Injecting trained value lambda = 0.68 (Based on paper/training logs)")
+                print("CRITICAL: 'lambda_strength' missing in checkpoint!")
+                print("MANUAL FIX: Injecting trained value lambda = 0.68 (Based on paper/training logs)")
                 self.temporal_bias.lambda_strength.data = torch.tensor(0.68, device=self.device)
 
             if lambda_key:
@@ -175,12 +175,12 @@ class TemporalCausalLM_Gen(nn.Module):
             missing, unexpected = self.load_state_dict(final_dict, strict=False)
             
             print(f"Weights Loaded. Missing: {len(missing)}, Unexpected: {len(unexpected)}")
-            print(f"✅ Current Model Lambda: {self.temporal_bias.lambda_strength.item():.4f}")
+            print(f"Current Model Lambda: {self.temporal_bias.lambda_strength.item():.4f}")
             
         except Exception as e:
-            print(f"⚠️ Error loading checkpoint: {e}")
+            print(f"Error loading checkpoint: {e}")
             self.temporal_bias.lambda_strength.data = torch.tensor(0.68, device=self.device)
-            print(f"✅ (Fallback) Current Model Lambda: {self.temporal_bias.lambda_strength.item():.4f}")
+            print(f"(Fallback) Current Model Lambda: {self.temporal_bias.lambda_strength.item():.4f}")
     def generate(self, input_ids, **kwargs):
         return self.model.generate(input_ids=input_ids, **kwargs)
 
@@ -198,7 +198,7 @@ def format_prompt_phi3(tokenizer, messages):
 
 def generate_responses(model, tokenizer, device, cases, desc="Model"):
     results = {}
-    print(f"\n🚀 Generating responses for: {desc}")
+    print(f"\nGenerating responses for: {desc}")
     
     gen_kwargs = {
         "max_new_tokens": 50,
@@ -227,7 +227,7 @@ def save_to_jsonl(data, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         for entry in data:
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
-    print(f"💾 Results saved to {filename}")
+    print(f"Results saved to {filename}")
 
 def run_blind_review_generation(dataset=None):
     config = TDPODKLConfig()
@@ -237,10 +237,10 @@ def run_blind_review_generation(dataset=None):
     target_cases = dataset if dataset is not None else test_cases
     
     if not target_cases:
-        print("⚠️ Warning: No test cases found to evaluate!")
+        print("Warning: No test cases found to evaluate!")
         return
 
-    print(f"📋 Total cases to evaluate: {len(target_cases)}")
+    print(f"Total cases to evaluate: {len(target_cases)}")
 
     tokenizer = AutoTokenizer.from_pretrained(config.model_name, trust_remote_code=True)
     
@@ -272,13 +272,13 @@ def run_blind_review_generation(dataset=None):
     ours_results = generate_responses(our_model, tokenizer, device, target_cases, desc="TAB-TDPO")
 
     print("\n" + "="*60)
-    print("📝 PREPARING HUMAN BLIND REVIEW DATA")
+    print("PREPARING HUMAN BLIND REVIEW DATA")
     print("="*60)
     
     review_data = []
     for case in target_cases:
         if case['id'] not in base_results or case['id'] not in ours_results:
-            print(f"⚠️ Skipping missing case: {case['id']}")
+            print(f"Skipping missing case: {case['id']}")
             continue
 
         entry = {
@@ -298,8 +298,8 @@ def run_blind_review_generation(dataset=None):
         review_data.append(entry)
         
         print(f"\nScenario: {case.get('name', case['id'])}")
-        print(f"🔴 Base: {base_results[case['id']][:100]}...")
-        print(f"🟢 Ours: {ours_results[case['id']][:100]}...")
+        print(f"Base: {base_results[case['id']][:100]}...")
+        print(f"Ours: {ours_results[case['id']][:100]}...")
 
     save_to_jsonl(review_data, "appendix_full_eval_results.jsonl")
 
@@ -309,5 +309,6 @@ if __name__ == "__main__":
     print(f"Needle: {data[0]['needle']}")
     print(f"Query: {data[0]['messages'][-1]['content']}")
     run_blind_review_generation(data)
+
 
 
