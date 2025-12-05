@@ -27,7 +27,7 @@ def _encode_with_eos(tokenizer, text, max_len = None):
     return ids
 
 def load_data_bypass_huggingface(data_dir, split):
-    print(f"🔍 Searching for data in the directory: {data_dir}")
+    print(f"Searching for data in the directory: {data_dir}")
     
     search_pattern_parquet = os.path.join(data_dir, "**", f"*{split}*.parquet")
     search_pattern_arrow = os.path.join(data_dir, "**", f"*{split}*.arrow")
@@ -40,16 +40,16 @@ def load_data_bypass_huggingface(data_dir, split):
         file_type = "arrow"
     
     if not found_files:
-        print("⚠️ No files found with split name, try searching all .parquet/.arrow ...")
+        print("No files found with split name, try searching all .parquet/.arrow ...")
         found_files = glob.glob(os.path.join(data_dir, "**", "*.parquet"), recursive=True)
         if not found_files:
             found_files = glob.glob(os.path.join(data_dir, "**", "*.arrow"), recursive=True)
     
     if not found_files:
-        print(f"❌ No data files found under {data_dir}!")
+        print(f"No data files found under {data_dir}!")
         return []
 
-    print(f"📦 Found {len(found_files)} files (Type: {file_type})")
+    print(f"Found {len(found_files)} files (Type: {file_type})")
     
     all_records = []
     for file_path in found_files:
@@ -65,7 +65,7 @@ def load_data_bypass_huggingface(data_dir, split):
                     with pa.ipc.open_file(file_path) as reader:
                         all_records.extend(reader.read_all().to_pylist())
         except Exception as e:
-            print(f"⚠️ read the file {os.path.basename(file_path)} failed: {e}")
+            print(f"read the file {os.path.basename(file_path)} failed: {e}")
             continue
             
     return all_records
@@ -87,10 +87,10 @@ def msc_to_temporal_preference(tokenizer, data_dir, split = "train", sessions_pe
     try:
         raw_data = load_data_bypass_huggingface(data_dir, split)
     except Exception as e:
-        print(f"⚠️ An exception occurred in local reading: {e}")
+        print(f"An exception occurred in local reading: {e}")
         raw_data = []
 
-    print(f"📚 Original record loaded successfully: {len(raw_data)} entry, start building samples...")
+    print(f"Original record loaded successfully: {len(raw_data)} entry, start building samples...")
 
     samples = []
     stats = {
@@ -182,7 +182,7 @@ def msc_to_temporal_preference(tokenizer, data_dir, split = "train", sessions_pe
         ))
         stats["success"] += 1
 
-    print(f"✅ Processing completed!  Final sample size: {len(samples)}")
-    print(f"📊 Statistical information: {stats}")
+    print(f"Processing completed!  Final sample size: {len(samples)}")
+    print(f"Statistical information: {stats}")
     
     return TemporalPreferenceDataset(samples)
