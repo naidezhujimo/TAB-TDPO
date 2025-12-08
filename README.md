@@ -147,6 +147,62 @@ python baselines/train_baselines.py \
     --output_dir ./checkpoints/dpo(/simpo)
 ```
 
+## 🔬 Reproducible Evaluation Pipeline
+
+To ensure the reproducibility of the **Win Rate** results reported in Table 1, we provide a complete evaluation pipeline consisting of data freezing, batch generation, and LLM-as-a-Judge automation.
+
+### 1. Prepare Fixed Test Set
+To guarantee that all models are evaluated on the exact same prompts, we first freeze a subset of the validation data.
+
+```bash
+# Generates 'fixed_msc_test.json' and 'fixed_ood_test.json' in ./data/
+python benchmarks/freeze_data.py \
+    --msc_data_dir ./data/msc \
+    --output_dir ./data \
+    --model_name microsoft/Phi-3.5-mini-instruct
+```
+
+### 2. Generate Responses
+Use the universal generation script to generate model responses.
+For DZ-TDPO (Ours):
+```bash
+python benchmarks/eval_generation_universal.py \
+    --ckpt_path ./checkpoints/dz_tdpo/final_model.pt \
+    --base_model_path microsoft/Phi-3.5-mini-instruct \
+    --data_path ./data/fixed_msc_test.json \
+    --output_file results_dz_tdpo.json \
+    --use_tab \
+    --batch_size 1
+```
+Note: The --use_tab flag is critical to enable the Dual-Zone Temporal Attention mechanism during inference.
+
+For Baselines (e.g., Standard DPO):
+```bash
+python benchmarks/eval_generation_universal.py \
+    --ckpt_path ./checkpoints/dpo/final_model.pt \
+    --base_model_path microsoft/Phi-3.5-mini-instruct \
+    --data_path ./data/fixed_msc_test.json \
+    --output_file results_baseline.json \
+    --batch_size 8
+```
+
+### 3. Automated Judgment (LLM-as-a-Judge)
+We employ DeepSeek-V3.2 (or GPT-5) as an impartial judge to compute the Win Rate. The script handles position bias mitigation (swapping) and concurrent requests automatically.
+Setup API Key:
+```bash
+export DEEPSEEK_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+# Or for OpenAI: export OPENAI_API_KEY="sk-..."
+```
+Run Evaluation:
+```bash
+python benchmarks/eval_judge.py \
+    --ours results_dz_tdpo.json \
+    --baseline results_baseline.json \
+    --output judge_verdict.json \
+    --model deepseek-chat \
+    --workers 10
+```
+
 ## 📊 Evaluation
 We provide a comprehensive suite of benchmarks to evaluate State Tracking, Robustness, and Safety.
 
