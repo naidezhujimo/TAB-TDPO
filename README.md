@@ -247,11 +247,14 @@ python benchmarks/merge_adapter.py \
 ## 📜 Citation
 If you find this work helpful, please consider citing:
 ```latex
-@misc{liao2025dztdpo,
+@misc{liao2025dztdponondestructivetemporalalignment,
       title={DZ-TDPO: Non-Destructive Temporal Alignment for Mutable State Tracking in Long-Context Dialogue}, 
       author={Yijun Liao},
       year={2025},
-      note={Under Review / Pre-print available at GitHub},
+      eprint={2512.03704},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2512.03704}, 
 }
 ```
 <div align="center">
